@@ -1,0 +1,7 @@
+test.py
+MANIFEST
+*.pyc
+*.egg-info/
+*__pycache__/
+dist/
+build/
