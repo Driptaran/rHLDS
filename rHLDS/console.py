@@ -37,8 +37,8 @@ class Console:
             msg.write(const.endBytes)
             self.sock.send(msg.getvalue())
 
-            response = self.sock.recv(const.packetSize)
-            return str(response).split(" ")[1]
+            response = BytesIO(self.sock.recv(const.packetSize))
+            return str(response.getvalue()).split(" ")[1]
         except Exception as e:
             print(e)
             self.disconnect()
@@ -61,7 +61,6 @@ class Console:
 
             self.sock.send(msg.getvalue())
             response = BytesIO(self.sock.recv(const.packetSize))
-            response.read(5)
 
             return response.getvalue()[5:-3].decode()
         except Exception as e:
