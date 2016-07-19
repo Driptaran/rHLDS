@@ -1,6 +1,7 @@
 __author__ = 'chmod'
 
 from rHLDS import const
+from io import BytesIO
 import socket
 import sys
 
@@ -29,7 +30,13 @@ class Console:
 
     def getChallenge(self):
         try:
-            self.sock.send(const.startBytes + b'getchallenge' + const.endBytes)
+            #Format message to server
+            msg = BytesIO()
+            msg.write(const.startBytes)
+            msg.write(b'getchallenge')
+            msg.write(const.endBytes)
+            self.sock.send(msg.getvalue())
+
             response = self.sock.recv(const.packetSize)
             return str(response).split(" ")[1]
         except Exception as e:
@@ -39,10 +46,24 @@ class Console:
 
     def execute(self, cmd):
         try:
-            challenge = self.getChallenge().encode()
-            self.sock.send(const.startBytes + b'rcon ' + challenge + b' ' + self.password.encode() + b' ' + str(cmd).encode() + const.endBytes)
-            response = self.sock.recv(const.packetSize)
-            return response[5:-3].decode()
+            challenge = self.getChallenge()
+
+            #Format message to server
+            msg = BytesIO()
+            msg.write(const.startBytes)
+            msg.write('rcon '.encode())
+            msg.write(challenge.encode())
+            msg.write(b' ')
+            msg.write(self.password.encode())
+            msg.write(b' ')
+            msg.write(cmd.encode())
+            msg.write(const.endBytes)
+
+            self.sock.send(msg.getvalue())
+            response = BytesIO(self.sock.recv(const.packetSize))
+            response.read(5)
+
+            return response.getvalue()[5:-3].decode()
         except Exception as e:
             print(e)
             self.disconnect()
