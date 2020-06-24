@@ -36,7 +36,7 @@ class Console:
             msg.write(const.endBytes)
             self.sock.send(msg.getvalue())
 
-            response = BytesIO(self.sock.recv(4096))
+            response = BytesIO(self.sock.recv(1400))
             return str(response.getvalue()).split(" ")[1]
         except Exception as e:
             print(e)
