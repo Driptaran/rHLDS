@@ -1,6 +1,5 @@
 __author__ = 'chmod'
 
-from rHLDS import const
 from io import BytesIO
 import socket
 import sys
@@ -37,7 +36,7 @@ class Console:
             msg.write(const.endBytes)
             self.sock.send(msg.getvalue())
 
-            response = BytesIO(self.sock.recv(const.packetSize))
+            response = BytesIO(self.sock.recv(4096))
             return str(response.getvalue()).split(" ")[1]
         except Exception as e:
             print(e)
@@ -60,9 +59,22 @@ class Console:
             msg.write(const.endBytes)
 
             self.sock.send(msg.getvalue())
-            response = BytesIO(self.sock.recv(const.packetSize))
+            data=""
+            while(1):
+                try:
+                    response = BytesIO(self.sock.recv(1400))
+                except:
+                    break
+                tmp=response.getvalue()[5:-3].decode('utf-8',errors='replace')
+#                print (len(tmp))
+                data+=tmp
+                if len(tmp)>=1200:
+                    continue
+                else:
+                    break
+#            print(data)
 
-            return response.getvalue()[5:-3].decode()
+            return data
         except Exception as e:
             print(e)
             self.disconnect()
